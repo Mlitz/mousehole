@@ -69,4 +69,41 @@ export const config = {
   port: environmentOrFallback("MOUSEHOLE_PORT", 5010, (value) =>
     Number.parseInt(value)
   ),
+
+  /**
+   * Enable SOCKS5 proxy for outbound HTTP requests.
+   *
+   * Defaults to false.
+   */
+  enableSocks5Proxy: environmentOrFallback(
+    "MOUSEHOLE_ENABLE_SOCKS5_PROXY",
+    false,
+    (value) => value.toLowerCase() === "yes" || value.toLowerCase() === "true"
+  ),
+
+  /**
+   * SOCKS5 proxy hostname/IP address.
+   *
+   * Required when enableSocks5Proxy is true.
+   */
+  socks5Host: environmentOrFallback("MOUSEHOLE_SOCKS5_HOST", ""),
+
+  /**
+   * SOCKS5 proxy port.
+   *
+   * Required when enableSocks5Proxy is true.
+   */
+  socks5Port: environmentOrFallback("MOUSEHOLE_SOCKS5_PORT", 1080, (value) =>
+    Number.parseInt(value)
+  ),
+
+  /**
+   * SOCKS5 proxy username (optional authentication).
+   */
+  socks5User: environmentOrFallback("MOUSEHOLE_SOCKS5_USER", ""),
+
+  /**
+   * SOCKS5 proxy password (optional authentication).
+   */
+  socks5Pass: environmentOrFallback("MOUSEHOLE_SOCKS5_PASS", ""),
 };

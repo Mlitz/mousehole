@@ -2,6 +2,7 @@ import { Cookie } from "tough-cookie";
 
 import { config } from "#backend/config.ts";
 import { SchemaError } from "#backend/error.ts";
+import { getFetchOptions } from "#backend/http-client.ts";
 import { parseJsonResponse } from "#backend/json.ts";
 import {
   mamUpdateDynamicSeedboxResponseBodySchema,
@@ -33,9 +34,9 @@ export async function updateMamIp(
   const performedAt = getNowZdt();
 
   // Note: the IP address is determined by the server from the request.
-  const response = await fetch(endpointUrl, {
+  const response = await fetch(endpointUrl, getFetchOptions({
     headers,
-  });
+  }));
 
   const json = await parseJsonResponse(response);
   const { data: body, error: parseError } =

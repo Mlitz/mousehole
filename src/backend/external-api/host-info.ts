@@ -1,16 +1,17 @@
 import { config } from "#backend/config.ts";
 import { SchemaError } from "#backend/error.ts";
+import { getFetchOptions } from "#backend/http-client.ts";
 import { parseJsonResponse } from "#backend/json.ts";
 import { ipResponseBodySchema } from "#backend/types.ts";
 
 const endpointUrl = new URL("https://t.myanonamouse.net/json/jsonIp.php");
 
 export async function getHostInfo() {
-  const response = await fetch(endpointUrl, {
+  const response = await fetch(endpointUrl, getFetchOptions({
     headers: {
       "User-Agent": config.userAgent,
     },
-  });
+  }));
 
   if (!response.ok) {
     throw new Error(
