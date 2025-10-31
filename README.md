@@ -151,15 +151,6 @@ bun run start
   seconds after which a MAM response is considered stale. This ensures that
   we're still talking with MAM at some regular interval and are detecting
   out-of-band changes to the cookie.
-- `MOUSEHOLE_ENABLE_SOCKS5_PROXY`: _(Default `no`)_ Enable SOCKS5 proxy for
-  outbound HTTP requests. Set to `yes` or `true` to enable.
-- `MOUSEHOLE_SOCKS5_HOST`: _(Required when proxy enabled)_ SOCKS5 proxy
-  hostname or IP address.
-- `MOUSEHOLE_SOCKS5_PORT`: _(Default `1080`)_ SOCKS5 proxy port.
-- `MOUSEHOLE_SOCKS5_USER`: _(Optional)_ SOCKS5 proxy username for
-  authentication.
-- `MOUSEHOLE_SOCKS5_PASS`: _(Optional)_ SOCKS5 proxy password for
-  authentication.
 
 ## First-time Setup (or if cookie gets out of sync)
 

@@ -116,29 +116,48 @@ function responseIsStale(response: MamResponse): boolean {
  * Clears any existing scheduled task and sets a new one.
  */
 function reschedule() {
-  // Cancel the previously scheduled task, if it exists.
-  if (currentBackgroundTask?.nextUpdateTimeoutId) {
-    clearTimeout(currentBackgroundTask.nextUpdateTimeoutId);
+  console.log("[DEBUG] reschedule() called");
+
+  try {
+    // Cancel the previously scheduled task, if it exists.
+    console.log("[DEBUG] Checking for existing task to clear");
+    if (currentBackgroundTask?.nextUpdateTimeoutId) {
+      console.log("[DEBUG] Clearing existing timeout");
+      clearTimeout(currentBackgroundTask.nextUpdateTimeoutId);
+    }
+
+    // Schedule the next run.
+    console.log("[DEBUG] About to schedule setTimeout");
+    const timeoutId = setTimeout(
+      () => {
+        console.log("[DEBUG] setTimeout callback fired, calling updateAndReschedule");
+        updateAndReschedule(undefined, true);
+      },
+      config.checkIntervalSeconds * 1000
+    );
+    console.log(`[DEBUG] setTimeout scheduled with ID: ${timeoutId}`);
+
+    // this won't be exactly right because of the time between last statement
+    // (setTimeout) and this line but it will be close enough for our purposes.
+    console.log("[DEBUG] About to calculate nextUpdateAt");
+    const nextUpdateAt = getNowZdt().add({
+      seconds: config.checkIntervalSeconds,
+    });
+    console.log(`[DEBUG] nextUpdateAt calculated: ${nextUpdateAt}`);
+
+    console.log("[DEBUG] About to set currentBackgroundTask");
+    currentBackgroundTask = {
+      nextUpdateTimeoutId: timeoutId,
+      nextUpdateAt,
+    };
+    console.log("[DEBUG] currentBackgroundTask set successfully");
+
+    console.log(`Next automatic update scheduled for: ${nextUpdateAt}`);
+    console.log("[DEBUG] About to return from reschedule()");
+  } catch (error) {
+    console.error("[DEBUG] ERROR in reschedule():", error);
+    throw error;
   }
-
-  // Schedule the next run.
-  const timeoutId = setTimeout(
-    () => updateAndReschedule(undefined, true),
-    config.checkIntervalSeconds * 1000
-  );
-
-  // this won't be exactly right because of the time between last statement
-  // (setTimeout) and this line but it will be close enough for our purposes.
-  const nextUpdateAt = getNowZdt().add({
-    seconds: config.checkIntervalSeconds,
-  });
-
-  currentBackgroundTask = {
-    nextUpdateTimeoutId: timeoutId,
-    nextUpdateAt,
-  };
-
-  console.log(`Next automatic update scheduled for: ${nextUpdateAt}`);
 }
 
 type UpdateAndRescheduleReturn<JustLogError extends boolean = false> =
@@ -153,16 +172,25 @@ export async function updateAndReschedule<JustLogError extends boolean = false>(
   options?: UpdateOptions,
   justLogError: JustLogError = false as JustLogError
 ): Promise<UpdateAndRescheduleReturn<JustLogError>> {
+  console.log("[DEBUG] updateAndReschedule() called");
   try {
+    console.log("[DEBUG] Calling update()");
     const newState = await update(options);
+    console.log("[DEBUG] update() completed");
 
     // write, but also return to callers (such as API handlers)
+    console.log("[DEBUG] Writing state file");
     await stateFile.write(newState);
+    console.log("[DEBUG] State file written");
 
+    console.log("[DEBUG] Notifying WebSocket clients");
     notifyWebSocketClients();
+    console.log("[DEBUG] WebSocket clients notified");
 
+    console.log("[DEBUG] About to return from updateAndReschedule()");
     return newState as UpdateAndRescheduleReturn<JustLogError>;
   } catch (error) {
+    console.log("[DEBUG] Error caught in updateAndReschedule():", error);
     if (justLogError) {
       console.error(error);
       return undefined as UpdateAndRescheduleReturn<JustLogError>;
@@ -170,7 +198,9 @@ export async function updateAndReschedule<JustLogError extends boolean = false>(
       throw error;
     }
   } finally {
+    console.log("[DEBUG] In finally block, about to call reschedule()");
     reschedule();
+    console.log("[DEBUG] reschedule() completed, exiting finally block");
   }
 }
 
@@ -180,8 +210,10 @@ export async function updateAndReschedule<JustLogError extends boolean = false>(
  */
 export function startBackgroundUpdateTask() {
   console.log("Starting background update task...");
+  console.log("[DEBUG] About to call initial updateAndReschedule()");
   // We run the update once immediately, then schedule the next one.
   updateAndReschedule(undefined, true);
+  console.log("[DEBUG] Initial updateAndReschedule() call initiated (async)");
 }
 
 export function getNextUpdateAt() {
