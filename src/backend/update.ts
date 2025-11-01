@@ -129,8 +129,9 @@ function reschedule() {
     // Schedule the next run.
     console.log("[DEBUG] About to schedule setTimeout");
     const timeoutId = setTimeout(
-      () => {
+      async () => {
         console.log("[DEBUG] setTimeout callback fired, calling updateAndReschedule");
+        await new Promise(resolve => setTimeout(resolve, 100));
         updateAndReschedule(undefined, true);
       },
       config.checkIntervalSeconds * 1000
